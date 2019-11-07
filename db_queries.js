@@ -32,7 +32,12 @@ getListItems = (list_id) => {
     return knex('list_items').where({ list_id })
 }
 
+checkExists = (id) => {
+    return knex('users').where({ id }).first()
+}
+
 module.exports = {
     checkLogin,
-    getLists
+    getLists,
+    checkExists
 }

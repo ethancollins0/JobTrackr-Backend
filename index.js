@@ -2,7 +2,10 @@ const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const db = require('./db_queries')
+const dotenv = require('dotenv')
+const jwt = require('jsonwebtoken')
 
+dotenv.config()
 const app = express()
 
 app.use(bodyParser.urlencoded())
@@ -20,11 +23,40 @@ app.post('/login', (req, res) => {
         ? db.checkLogin(email, password)
             .then(user_id => {
                 user_id
-                    ? db.getLists(user_id).then(data => res.json(data))
+                    ? db.getLists(user_id).then(data => {
+                        res.json({ token: jwt.sign({ user_id }, process.env.SECRET) , data })
+                    })
                     : res.json(null)
             })  
         : res.json(null)
 })
+
+app.post('/checktoken', (req, res, next) => {
+    if (req.headers.authorization){
+        jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
+            if (err){
+                res.json(null)
+            } else {
+                db.checkExists(decoded.user_id)
+                    .then(result => {
+                        if (result && result.id){
+                            db.getLists(decoded.user_id).then(data => {
+                                data
+                                    ? res.json({ user_id: decoded.user_id, data})
+                                    : res.json(null)
+                        })
+                    } else {
+                        res.json(null)
+                    }
+                })
+            }
+        })
+    } else {
+        res.json(null)
+    }
+})
+
+
 
 let port = process.env.PORT || 3001
 
