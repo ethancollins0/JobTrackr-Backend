@@ -11,31 +11,29 @@ exports.seed = function(knex) {
                                    password: 'password'}).returning('id')
         .then((user_id) => {
           user_id = user_id[0]
-          return knex('lists').insert({name: 'Todo', user_id}).returning('id')
+          return knex('lists').insert({name: 'Rejected', user_id, color: '#ff65a3'}).returning('id')
             .then((id) => {
               id = id[0]
               return knex('list_items').insert([
-                {name: 'First Task', description: 'Gotta do that thing', list_id: id},
-                {name: 'Second Task', description: 'Gotta do that second thing', list_id: id},
-                {name: 'Third Task', description: 'Gotta do that third thing', list_id: id},
+                {company: 'Amazon', title: 'Software Engineer', date: 'November 7th, 2019', list_id: id},
+                {company: 'Google', title: 'Web Developer', date: 'October 30th, 2019', list_id: id},
+                {company: 'Cisco', title: 'Jr. Software Engineer', date: 'October 13th, 2019', list_id: id},
               ])
               .then(() => {
-                return knex('lists').insert({ name: 'Doing', user_id }).returning('id')
+                return knex('lists').insert({ name: 'Applied', user_id, color: '#ff7eb9' }).returning('id')
                   .then(id => {
                     id = id[0]
                     return knex('list_items').insert([
-                      {name: `I'm doing this thing currently`, description: 'The thing that is currently being done', list_id: id},
+                      {company: `Ibotta`, title: 'Software Engineer', date: 'October 20th, 2019', list_id: id},
                     ])
                   })
               })
               .then(() => {
-                return knex('lists').insert({ name: 'Done', user_id}).returning('id')
+                return knex('lists').insert({ name: 'Interviewing', user_id, color: '#feff9c'}).returning('id')
                   .then(id => {
                     id = id[0]
                     return knex('list_items').insert([
-                      {name: 'This thing is completed', description: 'I finished this one', list_id: id},
-                      {name: 'This one is also completed', description: 'I also finished this one', list_id: id},
-                      {name: 'Newest completed', description: 'Most recently completed one', list_id: id},
+                      {company: 'Seas', title: 'Software Engineer', date: 'October 25th, 2019', list_id: id},
                     ])
                   })
               })

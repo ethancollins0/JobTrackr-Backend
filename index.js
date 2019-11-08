@@ -56,6 +56,39 @@ app.post('/checktoken', (req, res, next) => {
     }
 })
 
+app.post('lists', (req, res) => {
+    if (req.headers.authorization){
+        jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
+            if (err) {
+                res.json(null);
+            } else {
+                db.createList(decoded.user_id, req.body.list)
+                    .then(result => res.json(result))
+            }
+
+        })
+    } else {
+        res.json(null)
+    }
+})
+
+app.post('/list-item', (req, res) => {
+    if (req.headers.authorization && req.body && req.body.list_id){
+        jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
+            if (err) {
+                res.json(null)
+            } else {
+                db.createListItem(req.body)
+                    .then(list_item => {
+                        list_item
+                            ? res.json({ list_item })
+                            : res.json(null)
+                    })
+                    .catch(() => res.json(null))
+            }
+        })
+    }
+})
 
 
 let port = process.env.PORT || 3001

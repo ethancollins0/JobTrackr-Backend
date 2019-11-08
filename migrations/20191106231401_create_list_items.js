@@ -2,8 +2,10 @@
 exports.up = function(knex) {
     return knex.schema.createTable('list_items', (t) => {
         t.increments('id')
-        t.string('name')
-        t.string('description')
+        t.string('company')
+        t.string('title')
+        t.string('date')
+        t.string('link')
         t.integer('list_id').unsigned()
         t.foreign('list_id').references('id').inTable('lists')
     })
