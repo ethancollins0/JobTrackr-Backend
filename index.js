@@ -31,7 +31,7 @@ app.post('/login', (req, res) => {
         : res.json(null)
 })
 
-app.post('/checktoken', (req, res, next) => {
+app.post('/checktoken', (req, res) => {
     if (req.headers.authorization){
         jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
             if (err){
@@ -56,19 +56,42 @@ app.post('/checktoken', (req, res, next) => {
     }
 })
 
-app.post('lists', (req, res) => {
+app.post('/lists', (req, res) => {
     if (req.headers.authorization){
         jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
             if (err) {
                 res.json(null);
             } else {
-                db.createList(decoded.user_id, req.body.list)
-                    .then(result => res.json(result))
+                console.log(req.body.name, req.body.color)
+                db.createList(decoded.user_id, req.body.name, req.body.color)
+                    .then(result => {
+                        result && result[0]
+                            ? res.json({ 'success': result[0] })
+                            : res.json(null)
+                    })
+                    .catch(() => res.json(null))
             }
-
         })
     } else {
         res.json(null)
+    }
+})
+
+app.delete('/list', (req, res) => {
+    if (req.headers.authorization && req.body && req.body.id){
+        jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
+            if (err){
+                res.json(null)
+            } else {
+                db.deleteList(decoded.user_id, req.body.id)
+                    .then(numberDeleted => {
+                        res.json(numberDeleted)
+                    })
+                    .catch(() => res.json(null))
+            }
+        })
+    } else { 
+        res.json(null) 
     }
 })
 
@@ -87,6 +110,28 @@ app.post('/list-item', (req, res) => {
                     .catch(() => res.json(null))
             }
         })
+    }
+})
+
+app.delete('/list-item', (req, res) => {
+    if (req && req.headers.authorization && req.body && req.body.id){
+        const { id } = req.body
+        jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
+            if (err) {
+                res.json(null)
+            } else {
+                db.deleteListItem(decoded.user_id, id)
+                    .then(deletionArray => {
+                        bool = false
+                        deletionArray.map(int => int > 0 ? bool = true : null)
+                        bool
+                            ? res.json({ 'success': true })
+                            : () => res.json(null)
+                    })
+            }
+        })
+    } else {
+        res.json(null)
     }
 })
 

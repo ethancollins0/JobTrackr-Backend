@@ -36,8 +36,7 @@ checkExists = (id) => {
     return knex('users').where({ id }).first()
 }
 
-createList = (user_id, list) => {
-    const { name, color } = list
+createList = (user_id, name, color) => {
     return knex('lists').insert({ user_id, name, color }).returning('id')
 }
 
@@ -52,11 +51,29 @@ createListItem = (body) => {
         .catch(() => null)
 }
 
+deleteList = (user_id, list_id) => {
+    return knex('list_items').where({ list_id }).del()
+        .then(() => knex('lists').where({ user_id }).where({ id: list_id }).del())
+}
+
+deleteListItem = (user_id, id) => {
+    return knex('lists').where({ user_id })
+    .then(lists => {
+        let ids = lists.map(list => list.id)
+        return Promise.all(ids.map(list_id => {
+            return knex('list_items').where({ list_id }).where({ id }).del()
+        }))
+    })
+}
+
 module.exports = {
     checkLogin,
     getLists,
     checkExists,
-    createListItem
+    createListItem,
+    createList,
+    deleteList,
+    deleteListItem
 }
 
 function getDate(){
